@@ -1,0 +1,112 @@
+import {db} from "../firebase"
+import {uid} from "uid"
+import { set, ref, onValue, remove, update } from 'firebase/database'
+import {useState, useEffect} from "react"
+import { ToastContainer, toast } from 'react-toastify'
+import 'react-toastify/dist/ReactToastify.css'
+
+function Contact() {
+
+  {/*userName*/}
+  const [userName, setUserName] = useState("")
+  const [password, setPassword] = useState("")
+  const [todos, setTodos] = useState([])
+  const [isEdit, setIsEdit] = useState(false)
+  const [tempUuid, setTempUuid] = useState("")
+
+
+  const handleTodoChange = (e)=>{
+    setUserName(e.target.value)
+  }
+   const handlePasswordChange = (e)=>{
+    setPassword(e.target.value)
+  }
+
+  {/* Write */}
+  const writeToDatabase = () =>{
+    const uuid = uid()
+    set(ref(db, `/${uuid}`),{
+      userName,
+      password,
+      uuid,
+    })
+    
+    setUserName("")
+    setPassword("")
+   toast.success("Contact Added Successfully!")
+  }
+
+
+  {/* Read */}
+  useEffect(() => {
+    onValue(ref(db), (snapshot) => {
+      setTodos([])
+      const data = snapshot.val()
+    {/*If database if Empty*/}
+    if(data !== null){
+      Object.values(data).map((userName) => {
+        setTodos((oldArray) => [...oldArray, userName])
+      })
+    }
+    })
+
+  },[])
+
+
+  {/* Update */}
+  const handleUpdate = (userName) =>{
+    setIsEdit(true)
+    setTempUuid(userName.uuid)
+    setUserName(userName.userName)
+  }
+
+  {/* Submit button while on Update */}
+  const handleSubmitChange = () => {
+    update(ref(db, `/${tempUuid}`),{
+      userName,
+      uuid: tempUuid,
+    })
+    setUserName("")
+    setIsEdit(false)
+  }
+
+  {/* Delete */}
+  const handleDelete =(userName) =>{
+    remove(ref(db, `/${userName.uuid}`))
+    toast.error("Contact Deleted!")
+  }
+  return (
+    <div className="App">
+    <input type="text"  value={userName} onChange={handleTodoChange} placeholder="Username"/>
+    <input type="password"  value={password} onChange={handlePasswordChange} placeholder="Password"/>
+
+    {/*Changing Button Text in Update*/}
+    {isEdit ? (
+    <>
+    <button type="submit" onClick={handleSubmitChange}>Submit Change</button>
+    <button onClick={() => {
+      setIsEdit(false)
+      setUserName("")
+    }}>X</button>
+    </>
+    ):(
+    <button type="submit" onClick={writeToDatabase}>Submit</button>
+
+    )}
+
+    {todos.map((userName) => (
+      <div className = "table-body">
+      <h1> {userName.userName} </h1>
+      <h1> {userName.password} </h1>
+      <button onClick ={()=>handleUpdate(userName)} className="btn btn-primary">Update</button>
+      <button onClick={()=>handleDelete(userName)}  className="btn btn-danger">Delete</button>
+
+                  
+      </div>
+    ))}
+    <ToastContainer />
+    </div>
+  )
+}
+
+export default Contact

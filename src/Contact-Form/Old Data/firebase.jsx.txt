@@ -1,0 +1,16 @@
+
+import { initializeApp } from "firebase/app";
+import {getDatabase} from "firebase/database";
+const firebaseConfig = {
+  apiKey: "AIzaSyCrvQYfWUmiytLb4GfrurRkiesI_5A_55E",
+  authDomain: "contact-form-e0969.firebaseapp.com",
+  databaseURL: "https://contact-form-e0969-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "contact-form-e0969",
+  storageBucket: "contact-form-e0969.appspot.com",
+  messagingSenderId: "315213175437",
+  appId: "1:315213175437:web:3eb1d88fb63b65ccf3e0c4"
+};
+
+
+const app = initializeApp(firebaseConfig);
+export const db = getDatabase(app);

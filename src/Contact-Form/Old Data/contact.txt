@@ -1,0 +1,84 @@
+
+import React,{useState, useEffect} from "react"
+import {db} from "../firebase"
+import firebase from "firebase/compat/app";
+import "firebase/compat/database";
+import {toast} from "react-toastify"
+
+const initialState = {
+  name: "",
+  email: "",
+  contact:""
+}
+
+function Contact(){
+  {/*Setting the Data in initial State*/}
+  const [state, setState] = useState(initialState)
+  const [data,setData] = useState({})
+
+  {/*Destructuring the State to call them by their own name*/}
+  const{name, email, contact} = state;
+
+  {/*Handle the input field in Name Email and Contact*/}
+  const handleInputChange = (e) => {
+    const {name, value} = e.target
+    setState({...state, [name]:value})
+  }
+  {/*Handle the Submit button in the Form */}
+  const handleSubmit = (e) => {
+    e.preventDefault()
+    if(!name || !email ||!contact){
+      toast.error("Please Provide a value in each input field!")
+    } else{
+    db.child("Contacts").push(state, (err) =>{
+        {/*Validate in the Firebase if theres an error */}
+        if(err){
+          toast.error(err)
+        }
+        else{
+          toast.success("Contact Added Successfully!")
+        }
+      })
+    }
+  }
+
+
+  return(
+    <div>
+      <form onSubmit={handleSubmit}>
+        {/* Name Input Field*/}
+        <label htmlFor="name">Name: </label>
+        <input type="text" 
+        id="name"
+        name="name"
+        placeholder="Your Name ..."
+        value={name}
+        onChange={handleInputChange}
+        />
+        {/* Email Input Field*/}
+        <label htmlFor="email">Email: </label>
+        <input type="email" 
+        id="email"
+        name="email"
+        placeholder="Your Email ..."
+        value={email}
+        onChange={handleInputChange}
+        />
+        {/* Contact Input Field*/}
+        <label htmlFor="contact">Contact: </label>
+        <input type="number" 
+        id="contact"
+        name="contact"
+        placeholder="Your Contact ..."
+        value={contact}
+        onChange={handleInputChange}
+        />
+        {/**/}
+        <input type="submit" value="Save" onClick={handleSubmit}/>
+      </form>
+    </div>
+  )
+}
+
+export default Contact
+
